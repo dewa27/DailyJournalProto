@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quick Report — Daily Journal</title>
+    <title>Student List — Daily Journal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <link
@@ -27,480 +27,107 @@
         };
     </script>
     <style>
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        input[type="number"] {
-            -moz-appearance: textfield;
-        }
-
-        .step-content {
-            display: none;
-        }
-
-        .step-content.active {
-            display: block;
-        }
-
         body {
             font-family: 'DM Sans', sans-serif;
         }
 
-        /* A4 Preview Styling */
-        .a4-preview {
-            max-width: 100%;
+        .student-card {
             background: white;
-            box-shadow: 0 0 0 1px #e5e7eb;
-            margin: 0 auto;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 16px;
             display: flex;
-            flex-direction: column;
-            print-color-adjust: exact;
-            -webkit-print-color-adjust: exact;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s;
+            cursor: pointer;
         }
 
-        .a4-header {
+        .student-card:hover {
+            border-color: #10af13;
+            box-shadow: 0 4px 12px rgba(16, 175, 19, 0.15);
+        }
+
+        .student-card.sent {
+            background: #f0fdf4;
+            border-color: #10af13;
+        }
+
+        .student-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .student-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
             background: linear-gradient(135deg, #10af13, #4ec148);
             color: white;
-            padding: 28px 24px 20px;
-            border-bottom: 2px solid #0d8610;
-            flex-shrink: 0;
-        }
-
-        .a4-header h1 {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 16px;
-            font-family: 'DM Serif Display', serif;
-        }
-
-        .a4-header-meta {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-            font-size: 14px;
-        }
-
-        .a4-header-column {
             display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .a4-header-item span {
-            display: block;
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.85);
-            margin-bottom: 6px;
-            font-weight: 500;
-        }
-
-        .a4-header-item strong {
-            font-size: 15px;
-            font-weight: 700;
-        }
-
-        .a4-content {
-            padding: 20px;
-            flex: 1;
-            font-size: 13px;
-        }
-
-        .a4-section {
-            margin-bottom: 16px;
-            page-break-inside: avoid;
-        }
-
-        .a4-section-title {
-            font-weight: 700;
-            color: #10af13;
-            font-size: 14px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .a4-photo {
-            width: 100%;
-            max-height: 80mm;
-            object-fit: contain;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            margin-bottom: 12px;
-        }
-
-        .a4-list {
-            margin-left: 12px;
-            color: #374151;
-        }
-
-        .a4-list li {
-            margin-bottom: 6px;
-            line-height: 1.4;
-        }
-
-        .lesson-with-objectives {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            overflow: hidden;
-        }
-
-        .lesson-header {
-            padding: 10px 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .lesson-header:hover {
-            background: #f3f4f6;
-        }
-
-        .lesson-toggle-icon {
-            color: #10af13;
-            font-size: 14px;
-            transition: transform 0.2s;
-        }
-
-        .lesson-toggle-icon.expanded {
-            transform: rotate(180deg);
-        }
-
-        .lesson-objectives {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .lesson-objectives.expanded {
-            max-height: 500px;
-        }
-
-        .lesson-objectives ul {
-            list-style: disc;
-            padding: 10px 12px 10px 28px;
-            margin: 0;
-            font-size: 12px;
-            color: #374151;
-        }
-
-        .lesson-objectives li {
-            margin-bottom: 4px;
-            line-height: 1.3;
-        }
-
-        @media print {
-            .lesson-toggle-icon {
-                display: none !important;
-            }
-
-            .lesson-objectives {
-                max-height: none !important;
-                border-top: 1px solid #e5e7eb;
-            }
-
-            .lesson-objectives ul {
-                padding: 10px 12px 10px 28px;
-            }
-        }
-
-        .a4-info-box {
-            background: #f0fdf4;
-            padding: 12px;
-            border-left: 3px solid #10af13;
-            border-radius: 4px;
-            font-size: 12px;
-            line-height: 1.5;
-            color: #374151;
-        }
-
-        .a4-footer {
-            background: #f3f4f6;
-            padding: 12px 16px;
-            border-top: 1px solid #e5e7eb;
-            font-size: 11px;
-            color: #6b7280;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        @media print {
-            * {
-                margin: 0;
-                padding: 0;
-            }
-
-            body {
-                background: white;
-                display: flex;
-                justify-content: center;
-            }
-
-            header,
-            .step-indicator,
-            .pb-24>div:not(.a4-preview),
-            #step1,
-            #step2 {
-                display: none !important;
-            }
-
-            .a4-preview {
-                width: 210mm;
-                height: 297mm;
-                max-width: 100% !important;
-                display: flex !important;
-                box-shadow: none !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-
-            .a4-header {
-                padding: 20mm 16mm 14mm !important;
-            }
-
-            .a4-content {
-                padding: 16mm !important;
-                overflow-y: auto !important;
-            }
-
-            .a4-footer {
-                padding: 12mm 16mm !important;
-            }
-        }
-
-        .score-preset {
-            flex: 1;
-            padding: 10px 10px;
-            background: white;
-            border: 1.5px solid #d1d5db;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 14px;
-            color: #374151;
-            cursor: pointer;
-            transition: all 0.15s;
-            text-align: center;
-        }
-
-        .score-preset:hover {
-            border-color: #10af13;
-            color: #10af13;
-            background: #f0fdf4;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.45);
-            z-index: 50;
-            display: none;
             align-items: center;
             justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
         }
 
-        .modal-overlay.open {
-            display: flex;
+        .student-details h3 {
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 4px 0;
         }
 
-        .modal-box {
-            background: white;
-            border-radius: 20px;
-            width: 520px;
-            max-height: 80vh;
+        .student-details p {
+            font-size: 13px;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .status-badge {
             display: flex;
-            flex-direction: column;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 12px;
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .status-badge.completed {
+            background: #dcfce7;
+            color: #166534;
         }
 
         .action-btn {
-            padding: 12px 28px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 15px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
             background: linear-gradient(135deg, #10af13, #4ec148);
             color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .btn-primary:hover {
+        .action-btn:hover {
             transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(16, 175, 19, 0.3);
+            box-shadow: 0 4px 12px rgba(16, 175, 19, 0.3);
         }
 
-        .btn-secondary {
-            background: #f3f4f6;
-            color: #374151;
-            border: 1.5px solid #e5e7eb;
+        .action-btn.secondary {
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
         }
 
-        .btn-secondary:hover {
-            background: #e5e7eb;
-        }
-
-        .btn-purple {
-            background: linear-gradient(135deg, #7c3aed, #9333ea);
-            color: white;
-        }
-
-        .btn-purple:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3);
-        }
-
-        /* Mobile Base Styles */
-        #step1 .p-4 {
-            display: block;
-        }
-
-        #step1 .step-sidebar {
-            order: 2;
-        }
-
-        /* ===== Desktop Responsive Styles ===== */
-        @media (min-width: 1024px) {
-            body {
-                display: flex;
-                flex-direction: column;
-                height: 100vh;
-            }
-
-            header {
-                flex-shrink: 0;
-            }
-
-            .steps-wrapper {
-                display: flex;
-                flex: 1;
-            }
-
-            .sidebar-nav {
-                min-width: 280px;
-                max-width: 280px;
-                background: #f9fafb;
-                border-right: 2px solid #e5e7eb;
-                padding: 24px 16px;
-                flex-shrink: 0;
-                overflow-y: auto;
-            }
-
-            .step-indicator {
-                display: flex !important;
-                align-items: center;
-                gap: 14px;
-                padding: 14px 16px;
-                border-radius: 12px;
-                cursor: pointer;
-                transition: all 0.2s;
-                color: #6b7280;
-                font-weight: 500;
-                border: 2px solid transparent;
-                margin-bottom: 12px;
-            }
-
-            .step-indicator:hover {
-                background: #f0fdf4;
-                color: #10af13;
-            }
-
-            .step-indicator.active {
-                background: #ecfdf5;
-                color: #10af13;
-                border-color: #a7f3d0;
-            }
-
-            .step-indicator .step-circle {
-                min-width: 36px;
-                width: 36px;
-                height: 36px;
-                font-size: 14px;
-            }
-
-            .step-indicator span {
-                display: flex;
-                flex-direction: column;
-                gap: 2px;
-            }
-
-            .step-indicator span small {
-                font-size: 11px;
-                color: inherit;
-            }
-
-            .horizontal-steps {
-                display: none;
-            }
-
-            .steps-container {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                /* overflow: hidden; */
-            }
-
-            .pb-24 {
-                padding-bottom: 0 !important;
-                flex: 1;
-                overflow-y: auto;
-            }
-
-            .pb-24 > div {
-                padding: 32px 40px;
-            }
-
-            /* Step 1 Desktop Grid Layout */
-            #step1 .p-4 {
-                display: grid;
-                grid-template-columns: 1fr 350px;
-                gap: 32px;
-            }
-
-            #step1 .step-header {
-                grid-column: 1 / -1;
-            }
-
-            #step1 #selectedLessonsContainer {
-                grid-column: 1;
-            }
-
-            #step1 #noLessonsMessage {
-                grid-column: 1;
-            }
-
-            #step1 .step-sidebar {
-                grid-column: 2;
-                grid-row: 2 / 4;
-            }
-
-            /* Hide floating buttons on desktop when not on step 3 */
-            /* #step1 .fixed, #step2 .fixed {
-                display: flex !important;
-            } */
-
-            /* Show fixed buttons only on step 3 on desktop */
-            #step3 .fixed {
-                display: flex !important;
-                bottom: 0;
-                left: 280px;
-                right: 0;
-                width: auto;
-            }
+        .action-btn.secondary:hover {
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
     </style>
 </head>
@@ -509,1002 +136,189 @@
     <!-- Header -->
     <header class="bg-primary text-white sticky top-0 z-30 shadow-lg">
         <div class="px-4 py-4">
-            <div class="flex items-center justify-between mb-3">
-                <h1 class="font-bold text-xl">Daily Journal</h1>
-                <span class="bg-white/20 px-3 py-1 rounded-full text-sm">Draft</span>
-            </div>
-            <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-
-                    <div class="flex-grow">
-                        <p id="studentName" class="font-semibold text-base">
-                            Ivan Gunaguna
-                        </p>
-                        <p class="text-emerald-100 text-sm">
-                            Parent: <span id="parentPhone">-</span>
-                        </p>
+                    <img src="https://images.glints.com/unsafe/glints-dashboard.oss-ap-southeast-1.aliyuncs.com/company-logo/ff8acfa4d23038434c6f96322576f955.png" alt="Company Logo" class="h-10 w-auto" />
+                    <div>
+                        <p class="font-semibold text-base leading-tight">Mr. Muscle</p>
+                        <p class="text-emerald-100 text-sm">Teacher • Class 27A - Python</p>
                     </div>
                 </div>
-                <div class="">
-                    <p id="" class="font-semibold text-base">23 Maret 2026</p>
-                    <p class="text-emerald-100 text-sm">
-                        <span id="">09:00 WIB</span>
-                    </p>
+                <div class="text-right">
+                    <p class="font-semibold text-base leading-tight">23 Maret 2026</p>
+                    <p class="text-emerald-100 text-sm">09:00 WIB</p>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Progress Steps -->
-    <!-- Steps Wrapper for Desktop Layout -->
-    <div class="steps-wrapper ">
-        <!-- Sidebar Navigation (Desktop only) -->
-        <div class="sidebar-nav hidden lg:block">
-            <div class="step-indicator flex-col" data-step="1" onclick="goToStep(1)" style="flex-direction: column;">
-                <div class="flex items-center gap-3">
-                    <div class="step-circle w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">1</div>
-                    <span>Lessons</span>
-                </div>
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto p-4 pb-20">
+        <div class="mb-8">
+            <h2 class="text-3xl font-serif font-bold text-gray-800 mb-2">Create Daily Journal</h2>
+            <p class="text-gray-500">Select a student to create and send their journal</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-4 mb-8">
+            <div class="bg-white border-2 border-gray-200 rounded-2xl p-4 text-center">
+                <div class="text-2xl font-bold text-primary" id="totalStudents">0</div>
+                <p class="text-sm text-gray-600">Total Students</p>
             </div>
-            <div class="step-indicator flex-col" data-step="2" onclick="goToStep(2)" style="flex-direction: column;">
-                <div class="flex items-center gap-3">
-                    <div class="step-circle w-9 h-9 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center font-bold text-sm">2</div>
-                    <span>Details</span>
-                </div>
+            <div class="bg-white border-2 border-gray-200 rounded-2xl p-4 text-center">
+                <div class="text-2xl font-bold text-blue-600" id="createdCount">0</div>
+                <p class="text-sm text-gray-600">Created</p>
             </div>
-            <div class="step-indicator flex-col" data-step="3" onclick="goToStep(3)" style="flex-direction: column;">
-                <div class="flex items-center gap-3">
-                    <div class="step-circle w-9 h-9 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center font-bold text-sm">3</div>
-                    <span>Review</span>
-                </div>
+            <div class="bg-white border-2 border-green-600 rounded-2xl p-4 text-center">
+                <div class="text-2xl font-bold text-green-600" id="sentCount">0</div>
+                <p class="text-sm text-gray-600">Sent to Parents</p>
             </div>
         </div>
 
-        <!-- Main Content Area -->
-        <div class="steps-container">
-            <!-- Horizontal Steps (Mobile only) -->
-            <div class="horizontal-steps lg:hidden bg-white border-b-2 border-gray-200 sticky top-[88px] z-20">
-                <div class="px-4 py-3">
-                    <div class="flex items-center justify-between gap-0">
-                        <div class="flex-1">
-                            <div class="step-indicator flex text-center justify-center" data-step="1">
-                                <div class="flex flex-col items-center">
-                                    <div class="step-circle w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold mb-1">1</div>
-                                    <span class="text-xs font-semibold text-primary">Lessons</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div style="flex: 0.5; position: relative; height: 1px; background: #d1d5db; top: 12px;"></div>
-                        <div class="flex-1">
-                            <div class="step-indicator flex text-center justify-center" data-step="2">
-                                <div class="flex flex-col items-center">
-                                    <div class="step-circle w-10 h-10 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center font-bold mb-1">2</div>
-                                    <span class="text-xs font-semibold text-gray-500">Details</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div style="flex: 0.5; position: relative; height: 1px; background: #d1d5db; top: 12px;"></div>
-                        <div class="flex-1">
-                            <div class="step-indicator flex text-center justify-center" data-step="3">
-                                <div class="flex flex-col items-center">
-                                    <div class="step-circle w-10 h-10 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center font-bold mb-1">3</div>
-                                    <span class="text-xs font-semibold text-gray-500">Review</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-    <!-- Step Content Container -->
-    <div class="">
-        <!-- Step 1: Lessons & Photo -->
-        <div id="step1" class="step-content pb-32 active">
-            <div class="p-4">
-                <!-- Header Section (Full Width) -->
-                <div class="step-header flex items-start justify-between mb-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800 mb-1">
-                            Covered Lessons
-                        </h2>
-                        <p class="text-base text-gray-500">
-                            Choose lessons that are covered in this meeting and add photo
-                        </p>
-                    </div>
-                    <button id="selectLessonsBtn"
-                        class="bg-primary text-white font-bold rounded-xl px-6 py-3 shadow-lg hover:shadow-xl transition-all flex items-center gap-2">
-                        <i class="fas fa-plus-circle text-lg"></i>
-                        <span class="text-sm">Add</span>
-                    </button>
-                </div>
-
-                <!-- Left Column: Lessons List -->
-                <div id="selectedLessonsContainer" class="space-y-3 mb-6"></div>
-
-                <div id="noLessonsMessage"
-                    class="bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl p-8 text-center mb-6">
-                    <i class="fas fa-book-open text-5xl text-gray-300 mb-3"></i>
-                    <p class="text-lg font-semibold text-gray-600 mb-2">
-                        No Lessons Selected
-                    </p>
-                    <p class="text-sm text-gray-500">Tap "Add" to get started</p>
-                </div>
-
-                <!-- Right Column: Objectives + Photo (Desktop) -->
-                <div class="step-sidebar">
-                    <!-- Objectives -->
-                    <div
-                        class="bg-gradient-to-br from-emerald-50 to-white border-2 border-emerald-200 rounded-xl p-5 shadow-sm mb-6 lg:mb-6 lg:order-1">
-                        <div class="flex items-center gap-2 mb-4">
-                            <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-                                <i class="fas fa-bullseye text-white text-lg"></i>
-                            </div>
-                            <h3 class="font-bold text-lg text-gray-800">Lesson Objectives</h3>
-                        </div>
-                        <ul class="objectives-list text-base text-gray-700 space-y-2 pl-5 list-disc">
-                            <li>No lessons selected yet</li>
-                        </ul>
-                    </div>
-
-                    <!-- Photo Upload -->
-                    <div class="bg-white border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-primary hover:bg-emerald-50 transition-all cursor-pointer lg:order-2"
-                        id="photoUploadArea">
-                        <input type="file" id="photoInput" accept="image/*" class="hidden" />
-                        <div id="photoPreview" class="hidden mb-4">
-                            <img id="photoImg" class="w-full h-64 object-contain rounded-lg mb-3" />
-                            <button id="removePhoto"
-                                class="bg-red-500 text-white px-6 py-3 rounded-xl font-semibold text-base hover:bg-red-600 transition-colors">
-                                <i class="fas fa-trash-alt"></i> Remove Photo
-                            </button>
-                        </div>
-                        <div id="photoPlaceholder">
-                            <i class="fas fa-camera text-5xl text-gray-400 mb-3"></i>
-                            <p class="text-lg font-semibold text-gray-700 mb-2">
-                                Add Evidence Photo
-                            </p>
-                            <p class="text-sm text-gray-500 mb-4">
-                                Tap to upload class activity photo
-                            </p>
-                            <div class="inline-block bg-primary text-white px-6 py-3 rounded-xl font-semibold text-base">
-                                <i class="fas fa-upload"></i> Choose Photo
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Next Button -->
-            <div class="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 p-5 shadow-lg">
-                <button id="nextToStep2"
-                    class="w-full md:w-1/3 bg-gradient-to-r from-primary to-emerald-600 text-white font-bold py-4 rounded-xl text-lg shadow-lg flex items-center justify-center gap-2 ml-auto">
-                    Continue <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Step 2: Project, Notes & AI -->
-        <div id="step2" class="step-content pb-32">
-            <div class="p-4">
-                <h2 class="text-2xl font-bold text-gray-800 mb-1">Add Details</h2>
-                <p class="text-base text-gray-500 mb-4">Project and observations</p>
-
-                <!-- Active Project -->
-                <div class="mb-6">
-                    <label class="flex items-center justify-between mb-3">
-                        <span class="text-lg font-bold text-gray-800">Active Project</span>
-                        <input type="checkbox" id="projectToggle"
-                            class="w-6 h-6 text-primary rounded accent-emerald-500" />
-                    </label>
-                    <input id="projectInput" type="text" placeholder="e.g., Snake Game Development"
-                        class="w-full bg-gray-100 border-2 border-gray-300 rounded-xl px-4 py-4 text-base opacity-50"
-                        disabled />
-                </div>
-
-                <!-- Notes -->
-                <div class="mb-6">
-                    <label class="text-lg font-bold text-gray-800 block mb-3">Teacher Notes</label>
-                    <textarea id="teacherNotes" rows="6" placeholder="Write notes about student's performance..."
-                        class="w-full bg-white border-2 border-gray-300 rounded-xl px-4 py-4 text-base resize-none focus:border-primary focus:outline-none"></textarea>
-                </div>
-
-                <!-- Generate AI -->
-                <button id="generateAIBtn"
-                    class="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold py-5 rounded-xl shadow-lg mb-4 text-xl flex items-center justify-center gap-3">
-                    <i class="fas fa-robot text-2xl"></i> Generate AI Summary
-                </button>
-
-                <!-- AI Summary -->
-                <div class="bg-white border-2 border-gray-200 rounded-xl p-4 mb-6">
-                    <div class="flex items-center justify-between mb-3">
-                        <h3 class="font-bold text-lg text-gray-800">AI Summary</h3>
-                        <span id="aiStatus" class="text-sm text-gray-500 italic">Not generated</span>
-                    </div>
-                    <div id="aiSummary" class="text-base text-gray-700 leading-relaxed min-h-[100px]">
-                        Click "Generate AI Summary" above to create an intelligent report...
-                    </div>
-                </div>
-            </div>
-
-            <!-- Navigation Buttons -->
-            <div class="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 p-4 shadow-lg">
-                <div class="flex gap-3 md:w-1/3 ml-auto">
-                    <button id="backToStep1"
-                        class="flex-1 bg-gray-200 text-gray-700 font-bold py-4 rounded-xl text-base flex items-center justify-center gap-2">
-                        <i class="fas fa-arrow-left"></i> Back
-                    </button>
-                    <button id="nextToStep3"
-                        class="flex-1 bg-gradient-to-r from-primary to-emerald-600 text-white font-bold py-4 rounded-xl text-base flex items-center justify-center gap-2">
-                        Continue <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Step 3: Review & Submit -->
-        <div id="step3" class="step-content sm:pb-32">
-            <div class="p-4 pb-32">
-                <h2 class="text-2xl font-bold text-gray-800 mb-1">Review Report</h2>
-                <p class="text-base text-gray-500 mb-4">Check before submitting</p>
-
-                <!-- A4 Preview -->
-                <div class="a4-preview mb-6">
-                    <!-- A4 Header -->
-                    <div class="a4-header">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px;">
-                            <h1
-                                style="font-size: 28px; font-weight: bold; margin: 0; font-family: 'DM Serif Display', serif;">
-                                Daily Journal</h1>
-                            <img src="https://infolomba.id/images/event/logo/timedoor-academy-27.png" alt="Company Logo"
-                                style="height: 28px; width: auto;" />
-                        </div>
-                        <div class="a4-header-meta">
-                            <div class="a4-header-column">
-                                <div class="a4-header-item">
-                                    <span>Student</span>
-                                    <strong id="a4Student">Ivan Gunaguna</strong>
-                                </div>
-                                <div class="a4-header-item">
-                                    <span>Class</span>
-                                    <strong id="a4Class">27A - Python</strong>
-                                </div>
-                                <div class="a4-header-item">
-                                    <span>Book Name</span>
-                                    <strong id="a4BookName">Daily Journal</strong>
-                                </div>
-                            </div>
-                            <div class="a4-header-column">
-                                <div class="a4-header-item">
-                                    <span>Date & Time</span>
-                                    <strong id="a4DateTime">-</strong>
-                                </div>
-                                <div class="a4-header-item">
-                                    <span>Teacher</span>
-                                    <strong id="a4Teacher">Mr. Muscle</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- A4 Content -->
-                    <div class="a4-content">
-                        <!-- Photo -->
-                        <div id="a4PhotoSection" style="display:none;" class="a4-section">
-                            <img id="a4Photo" class="a4-photo" />
-                        </div>
-
-                        <!-- Covered Lessons -->
-                        <div id="a4CoveredLessonsSection" class="a4-section">
-                            <div class="a4-section-title">
-                                <i class="fas fa-book-open"></i> Covered Lessons
-                            </div>
-                            <div id="a4CoveredLessons" class="a4-list" style="margin-left: 0;">
-                                <p class="text-gray-400 text-12px">No lessons selected</p>
-                            </div>
-                            <p style="font-size: 11px; color: #9CA3AF; margin-top: 8px; font-style: italic;">Note:
-                                Performance scores are used for tracking but not displayed in the final journal.</p>
-                        </div>
-
-                        <!-- AI Summary & Active Project Grid -->
-                        <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 16px; margin-bottom: 16px;">
-                            <!-- AI Summary -->
-                            <div id="a4AISummarySection" style="display:none;" class="a4-section">
-                                <div class="a4-section-title">
-                                    <i class="fas fa-robot"></i> AI-Generated Summary
-                                </div>
-                                <div id="a4AISummary" class="a4-info-box"></div>
-                            </div>
-
-                            <!-- Active Project -->
-                            <div id="a4ProjectSection" style="display:none;" class="a4-section">
-                                <div class="a4-section-title">
-                                    <i class="fas fa-project-diagram"></i> Active Project
-                                </div>
-                                <div class="a4-info-box">
-                                    <strong id="a4Project"></strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- A4 Footer -->
-                    <div class="a4-footer">
-                        <span>Report #001</span>
-                        <span>© 2026 Daily Journal System</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Buttons - Floating -->
-            <div class="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 p-4 shadow-lg">
-                <div class="space-y-3 md:w-1/3 ml-auto">
-                    <button id="sendToParentBtn"
-                        class="w-full bg-gradient-to-r from-primary to-emerald-600 text-white font-bold py-5 rounded-xl shadow-lg text-lg flex items-center justify-center gap-2">
-                        <i class="fas fa-whatsapp text-xl"></i> Send to Parent
-                    </button>
-                    <div class="flex gap-3">
-                        <button id="backToStep2"
-                            class="w-1/2 md:w-1/4 flex-1 bg-gray-300 text-gray-700 font-bold py-4 rounded-xl text-base flex items-center justify-center gap-2"
-                            onclick="goToStep(2)">
-                            <i class="fas fa-arrow-left"></i> Back
-                        </button>
-                        <button id="saveJournalBtn"
-                            class="w-1/2 md:w-1/4 flex-1 bg-blue-500 text-white font-bold py-4 rounded-xl text-base flex items-center justify-center gap-2">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        </div><!-- Close steps-container -->
-        </div><!-- Close steps-wrapper -->
-
-        <!-- Back to List Button (Outside of steps) -->
-        <div id="backToListBtn" style="display:none;" class="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 p-4 shadow-lg">
-            <button class="w-full bg-gray-200 text-gray-700 font-bold py-4 rounded-xl text-lg flex items-center justify-center gap-2" onclick="redirectToList()">
-                <i class="fas fa-arrow-left"></i> Back to List
-            </button>
-        </div>
-    </div>
-
-    <!-- Select Lessons Modal -->
-    <div id="selectLessonsModal" class="modal-overlay">
-        <div class="modal-box">
-            <div
-                class="bg-primary text-white px-6 py-4 rounded-t-[20px] flex justify-between items-center flex-shrink-0">
-                <h2 class="font-serif font-bold text-lg">Select Covered Lessons</h2>
-                <button id="closeSelectModal"
-                    class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <div class="px-5 py-3 bg-gray-50 border-b flex-shrink-0">
-                <div class="relative">
-                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                    <input type="text" id="lessonSearch" placeholder="Search lessons..."
-                        class="w-full pl-9 pr-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-sm focus:border-primary transition-colors" />
-                </div>
-            </div>
-
-            <div class="px-5 py-2 bg-emerald-50 border-b text-sm text-gray-600 flex-shrink-0">
-                <span id="modalSelectedCount" class="font-bold text-primary">0</span> lessons selected
-            </div>
-
-            <div class="flex-grow overflow-y-auto p-5">
-                <div id="allLessonsContainer" class="space-y-2.5"></div>
-            </div>
-
-            <div class="bg-white px-5 py-4 border-t rounded-b-[20px] flex gap-3 flex-shrink-0">
-                <button id="cancelSelectModal"
-                    class="action-btn btn-secondary flex-1 justify-center py-3">Cancel</button>
-                <button id="confirmSelectModal" class="action-btn btn-primary flex-1 justify-center py-3">Confirm
-                    Selection</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Loading Modal -->
-    <div id="loadingModal" style="display:none;" class="modal-overlay">
-        <div class="modal-box" style="max-width: 300px;">
-            <div class="flex flex-col items-center justify-center py-12">
-                <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p class="text-lg font-semibold text-gray-800 text-center">Sending to Parent...</p>
-            </div>
-        </div>
-    </div>
+        <!-- Students List -->
+        <div class="space-y-3" id="studentsList"></div>
+    </main>
 
     <script>
-        const CONFIG = {
-            student: { name: "Ivan Gunaguna", id: "12833", class: "27A - Python" },
-            teacher: { name: "Mr. Muscle" },
-            allLessons: [
-                { id: 1, name: "Lesson 1 - Introduction to Pygame", score: 85, selected: true, objectives: ["Introducing concepts related to Game development", "Know how to develop games using Pygame", "Know how to set the environment in Pygame"] },
-                { id: 2, name: "Lesson 2 - Add Another Sprite for Snake Game", score: 92, selected: true, objectives: ["Know how to initialize FPS in Pygame", "Add another object to the Pygame canvas", "Understand list operations in Python"] },
-                { id: 3, name: "Lesson 3 - Working with Sprites", score: 0, selected: false, objectives: ["Understand sprite concepts in Pygame", "Know how to manipulate sprites effectively"] },
-                { id: 4, name: "Lesson 4 - Collision Detection", score: 0, selected: false, objectives: ["Know how to detect collisions in games", "Implement collision responses"] },
-                { id: 5, name: "Lesson 5 - Game Sound Effects", score: 0, selected: false, objectives: ["Learn to add sound effects in Pygame", "Manage background music"] },
-                { id: 6, name: "Lesson 6 - Scoring System", score: 0, selected: false, objectives: ["Implement scoring and game states", "Create win/lose conditions"] },
-                { id: 7, name: "Lesson 7 - Player Controls", score: 0, selected: false, objectives: ["Handle keyboard and mouse input", "Implement smooth player movement"] },
-                { id: 8, name: "Lesson 8 - Game Animations", score: 0, selected: false, objectives: ["Create sprite animations", "Use sprite sheets effectively"] },
-                { id: 9, name: "Lesson 9 - Level Design", score: 0, selected: false, objectives: ["Design engaging game levels", "Implement level progression"] },
-                { id: 10, name: "Lesson 10 - Final Project", score: 0, selected: false, objectives: ["Combine all learned concepts", "Create a complete game"] },
-            ],
-        };
+        // Sample student data - you can replace this with API data
+        const students = [
+            { id: 1, name: "Aldi Pratama", parentPhone: "6281234567890", class: "27A" },
+            { id: 2, name: "Budi Santoso", parentPhone: "6289876543210", class: "27A" },
+            { id: 3, name: "Citra Dewi", parentPhone: "6285555555555", class: "27A" },
+            { id: 4, name: "Dina Kusuma", parentPhone: "6281111111111", class: "27A" },
+            { id: 5, name: "Eka Purnama", parentPhone: "6282222222222", class: "27A" },
+            { id: 6, name: "Fani Aditya", parentPhone: "6283333333333", class: "27A" },
+            { id: 7, name: "Gita Maharani", parentPhone: "6284444444444", class: "27A" },
+            { id: 8, name: "Hendra Wijaya", parentPhone: "6287777777777", class: "27A" },
+        ];
 
-        let uploadedPhoto = null;
-        let tempSelections = {};
-        let currentStep = 1;
+        let journalsData = {};
 
-        // ---- Step Navigation ----
-        function goToStep(step) {
-            document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
-            document.getElementById(`step${step}`).classList.add('active');
-            currentStep = step;
-            updateStepIndicators();
-            updateDesktopButtonVisibility(step);
-            if (step === 3) updatePreview();
-            window.scrollTo(0, 0);
+        function initPage() {
+            loadJournalsFromStorage();
+            renderStudents();
+            updateStats();
         }
 
-        function updateDesktopButtonVisibility(step) {
-            // Hide all desktop nav sections
-            const step1Nav = document.getElementById('step1-nav-desktop');
-            const step2Nav = document.getElementById('step2-nav-desktop');
-            const step3Nav = document.getElementById('step3-nav-desktop');
+        function renderStudents() {
+            const listContainer = document.getElementById('studentsList');
+            const totalEl = document.getElementById('totalStudents');
             
-            if (step1Nav) step1Nav.style.display = 'none';
-            if (step2Nav) step2Nav.style.display = 'none';
-            if (step3Nav) step3Nav.style.display = 'none';
+            totalEl.textContent = students.length;
 
-            // Show the appropriate nav section
-            if (step === 1 && step1Nav) {
-                step1Nav.style.display = 'flex';
-            } else if (step === 2 && step2Nav) {
-                step2Nav.style.display = 'flex';
-            } else if (step === 3 && step3Nav) {
-                step3Nav.style.display = 'flex';
-            }
-        }
+            listContainer.innerHTML = students.map(student => {
+                const isCompleted = journalsData[student.id]?.completed || false;
+                const isSent = journalsData[student.id]?.sent || false;
+                const initials = student.name.split(' ').map(word => word[0]).join('');
 
-        function redirectToList() {
-            window.location.href = 'student-list.html';
-        }
-
-        function updateStepIndicators() {
-            document.querySelectorAll('.step-indicator').forEach((indicator) => {
-                const stepNum = parseInt(indicator.getAttribute('data-step'));
-                const circle = indicator.querySelector('.step-circle');
-                const label = indicator.querySelector('span');
-
-                if (stepNum < currentStep) {
-                    circle.className = 'step-circle w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold mb-1';
-                    circle.innerHTML = '<i class="fas fa-check"></i>';
-                    label.className = 'text-xs font-semibold text-emerald-500';
-                } else if (stepNum === currentStep) {
-                    circle.className = 'step-circle w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold mb-1';
-                    circle.innerText = stepNum;
-                    label.className = 'text-xs font-semibold text-primary';
-                } else {
-                    circle.className = 'step-circle w-10 h-10 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center font-bold mb-1';
-                    circle.innerText = stepNum;
-                    label.className = 'text-xs font-semibold text-gray-500';
-                }
-            });
-
-            const lines = document.querySelectorAll('.flex-1.h-1.bg-gray-300');
-            lines.forEach((line, index) => {
-                if (index + 1 < currentStep) {
-                    line.className = 'flex-1 h-1 bg-emerald-500 mx-2';
-                } else {
-                    line.className = 'flex-1 h-1 bg-gray-300 mx-2';
-                }
-            });
-        }
-
-        // ---- Preview ----
-        function updatePreview() {
-            // Update A4 Header
-            document.getElementById('a4Student').textContent = CONFIG.student.name;
-            document.getElementById('a4Class').textContent = CONFIG.student.class;
-            document.getElementById('a4BookName').textContent = 'Daily Journal';
-            document.getElementById('a4Teacher').textContent = CONFIG.teacher.name;
-            const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            document.getElementById('a4DateTime').textContent = `${dateStr} • 09:00`;
-
-            // Update Photo
-            const photoSection = document.getElementById('a4PhotoSection');
-            if (uploadedPhoto) {
-                document.getElementById('a4Photo').src = uploadedPhoto;
-                photoSection.style.display = 'block';
-            } else {
-                photoSection.style.display = 'none';
-            }
-
-            // Update Covered Lessons
-            const coveredLessonsContainer = document.getElementById('a4CoveredLessons');
-            const selectedLessons = CONFIG.allLessons.filter(l => l.selected);
-            coveredLessonsContainer.innerHTML = '';
-            if (selectedLessons.length) {
-                selectedLessons.forEach(lesson => {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'lesson-with-objectives';
-
-                    const header = document.createElement('div');
-                    header.className = 'lesson-header';
-                    header.innerHTML = `
-                        <div style="flex: 1;">
-                            <strong style="color: #10af13; font-size: 13px;">${lesson.name}</strong>
-                        </div>
-                        <i class="fas fa-chevron-down lesson-toggle-icon"></i>
-                    `;
-
-                    const objectivesDiv = document.createElement('div');
-                    objectivesDiv.className = 'lesson-objectives';
-
-                    if (lesson.objectives && lesson.objectives.length > 0) {
-                        objectivesDiv.innerHTML = '<ul>' + lesson.objectives.map(obj => `<li>${obj}</li>`).join('') + '</ul>';
-                    }
-
-                    header.addEventListener('click', function () {
-                        objectivesDiv.classList.toggle('expanded');
-                        header.querySelector('.lesson-toggle-icon').classList.toggle('expanded');
-                    });
-
-                    wrapper.appendChild(header);
-                    wrapper.appendChild(objectivesDiv);
-                    coveredLessonsContainer.appendChild(wrapper);
-                });
-            } else {
-                coveredLessonsContainer.innerHTML = '<p class="text-gray-400 text-sm">No lessons selected</p>';
-            }
-
-            // Update Project
-            const project = document.getElementById('projectInput').value.trim();
-            const projSec = document.getElementById('a4ProjectSection');
-            if (project) {
-                document.getElementById('a4Project').textContent = project;
-                projSec.style.display = 'block';
-            } else {
-                projSec.style.display = 'none';
-            }
-
-            // Update AI Summary
-            const aiSummary = document.getElementById('aiSummary');
-            const aiStatus = document.getElementById('aiStatus');
-            const aiSec = document.getElementById('a4AISummarySection');
-            if (aiSummary.textContent && aiStatus.textContent === 'Generated ✓') {
-                document.getElementById('a4AISummary').textContent = aiSummary.textContent;
-                aiSec.style.display = 'block';
-            } else {
-                aiSec.style.display = 'none';
-            }
-        }
-
-        // Full collection of lesson data (for saving)
-        let formData = {
-            lessons: [],
-            photo: null,
-            projectEnabled: false,
-            projectInput: '',
-            teacherNotes: '',
-            aiSummary: '',
-            lastSaved: null
-        };
-
-        function autosaveData() {
-            const student = JSON.parse(localStorage.getItem('currentStudent') || 'null');
-            if (!student) return;
-
-            formData.lessons = CONFIG.allLessons.filter(l => l.selected);
-            formData.projectEnabled = document.getElementById('projectToggle')?.checked || false;
-            formData.projectInput = document.getElementById('projectInput')?.value || '';
-            formData.teacherNotes = document.getElementById('teacherNotes')?.value || '';
-            formData.aiSummary = document.getElementById('aiSummary')?.textContent || '';
-            formData.lastSaved = new Date().toISOString();
-
-            let journalsData = JSON.parse(localStorage.getItem('journalsData') || '{}');
-            if (!journalsData[student.id]) journalsData[student.id] = {};
-            journalsData[student.id].data = formData;
-            journalsData[student.id].completed = false;
-            localStorage.setItem('journalsData', JSON.stringify(journalsData));
-        }
-
-        function loadSavedData() {
-            const student = JSON.parse(localStorage.getItem('currentStudent') || 'null');
-            if (!student) return;
-
-            let journalsData = JSON.parse(localStorage.getItem('journalsData') || '{}');
-            if (journalsData[student.id]?.data) {
-                const saved = journalsData[student.id].data;
-                
-                // Restore lessons
-                if (saved.lessons && Array.isArray(saved.lessons)) {
-                    CONFIG.allLessons.forEach(l => {
-                        l.selected = saved.lessons.some(sl => sl.id === l.id);
-                        l.score = saved.lessons.find(sl => sl.id === l.id)?.score || 0;
-                    });
-                }
-                
-                // Restore form fields
-                setTimeout(() => {
-                    if (document.getElementById('projectToggle')) {
-                        document.getElementById('projectToggle').checked = saved.projectEnabled;
-                        document.getElementById('projectInput').disabled = !saved.projectEnabled;
-                        document.getElementById('projectInput').style.opacity = saved.projectEnabled ? '1' : '0.5';
-                    }
-                    if (document.getElementById('projectInput')) document.getElementById('projectInput').value = saved.projectInput || '';
-                    if (document.getElementById('teacherNotes')) document.getElementById('teacherNotes').value = saved.teacherNotes || '';
-                    if (document.getElementById('aiSummary') && saved.aiSummary) document.getElementById('aiSummary').textContent = saved.aiSummary;
-                }, 100);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            // Load student from localStorage (from student-list.html)
-            const currentStudent = JSON.parse(localStorage.getItem('currentStudent') || 'null');
-            if (currentStudent) {
-                document.getElementById('studentName').textContent = currentStudent.name;
-                document.getElementById('parentPhone').textContent = currentStudent.parentPhone;
-            }
-
-            renderSelectedLessons();
-            updateObjectives();
-            updateStepIndicators();
-            updateDesktopButtonVisibility(1);
-            loadSavedData();
-
-            // Navigation
-            document.getElementById('nextToStep2').addEventListener('click', () => goToStep(2));
-            document.getElementById('backToStep1').addEventListener('click', () => goToStep(1));
-            document.getElementById('nextToStep3').addEventListener('click', () => {
-                autosaveData();
-                goToStep(3);
-            });
-
-            // Save on Step 3
-            document.getElementById('saveJournalBtn').addEventListener('click', () => {
-                const student = JSON.parse(localStorage.getItem('currentStudent') || 'null');
-                if (!student) {
-                    alert('Student information not found');
-                    return;
-                }
-                autosaveData();
-                
-                // Mark as completed but NOT sent
-                let journalsData = JSON.parse(localStorage.getItem('journalsData') || '{}');
-                if (!journalsData[student.id]) journalsData[student.id] = {};
-                journalsData[student.id].completed = true;
-                journalsData[student.id].sent = false;
-                journalsData[student.id].savedAt = new Date().toISOString();
-                localStorage.setItem('journalsData', JSON.stringify(journalsData));
-                
-                alert('✓ Journal saved successfully!');
-                window.location.href = 'student-list.html';
-            });
-
-            // Toggle project input
-            const projectToggle = document.getElementById('projectToggle');
-            const projectInput = document.getElementById('projectInput');
-            if (projectToggle && projectInput) {
-                projectToggle.addEventListener('change', function () {
-                    projectInput.disabled = !this.checked;
-                    projectInput.style.opacity = this.checked ? '1' : '0.5';
-                    autosaveData();
-                });
-            }
-
-            // Autosave on input changes
-            document.addEventListener('change', autosaveData);
-            document.addEventListener('input', autosaveData);
-
-            // Send to Parent via WhatsApp
-            document.getElementById('sendToParentBtn').addEventListener('click', () => {
-                const student = JSON.parse(localStorage.getItem('currentStudent') || 'null');
-                if (!student) {
-                    alert('Student information not found');
-                    return;
-                }
-
-                // Show confirmation dialog
-                const confirmed = confirm(`Send journal for ${student.name} to parent?`);
-                if (!confirmed) return;
-
-                // Auto-save first
-                autosaveData();
-                
-                // Save as completed and sent
-                let journalsData = JSON.parse(localStorage.getItem('journalsData') || '{}');
-                if (!journalsData[student.id]) journalsData[student.id] = {};
-                journalsData[student.id].completed = true;
-                journalsData[student.id].sent = true;
-                journalsData[student.id].sentAt = new Date().toISOString();
-                localStorage.setItem('journalsData', JSON.stringify(journalsData));
-                
-                // Show loading modal
-                document.getElementById('loadingModal').style.display = 'flex';
-                
-                // Fake loading for 1-2 seconds, then redirect
-                setTimeout(() => {
-                    window.location.href = 'student-list.html';
-                }, 1500);
-            });
-
-            // Desktop Send to Parent Button
-            const sendToParentDesktop = document.getElementById('sendToParentDesktop');
-            if (sendToParentDesktop) {
-                sendToParentDesktop.addEventListener('click', () => {
-                    const student = JSON.parse(localStorage.getItem('currentStudent') || 'null');
-                    if (!student) {
-                        alert('Student information not found');
-                        return;
-                    }
-
-                    // Show confirmation dialog
-                    const confirmed = confirm(`Send journal for ${student.name} to parent?`);
-                    if (!confirmed) return;
-
-                    // Auto-save first
-                    autosaveData();
-                    
-                    // Save as completed and sent
-                    let journalsData = JSON.parse(localStorage.getItem('journalsData') || '{}');
-                    if (!journalsData[student.id]) journalsData[student.id] = {};
-                    journalsData[student.id].completed = true;
-                    journalsData[student.id].sent = true;
-                    journalsData[student.id].sentAt = new Date().toISOString();
-                    localStorage.setItem('journalsData', JSON.stringify(journalsData));
-                    
-                    // Show loading modal
-                    document.getElementById('loadingModal').style.display = 'flex';
-                    
-                    // Fake loading for 1-2 seconds, then redirect
-                    setTimeout(() => {
-                        window.location.href = 'student-list.html';
-                    }, 1500);
-                });
-            }
-
-            // // Back to Student List
-            // document.getElementById('backToListBtn').addEventListener('click', () => {
-            //     // Just go back without changing status
-            //     window.location.href = 'student-list.html';
-            // });
-
-            // ---- Render Selected Lessons ----
-            function renderSelectedLessons() {
-                const container = document.getElementById('selectedLessonsContainer');
-                const noMsg = document.getElementById('noLessonsMessage');
-                container.innerHTML = '';
-                const selected = CONFIG.allLessons.filter(l => l.selected);
-
-                if (!selected.length) { noMsg.classList.remove('hidden'); return; }
-                noMsg.classList.add('hidden');
-
-                selected.forEach(lesson => {
-                    const div = document.createElement('div');
-                    div.className = 'bg-white border-2 border-primary rounded-2xl overflow-hidden shadow-sm';
-                    div.innerHTML = `
-                        <div class="px-5 py-4 flex justify-between border-b border-gray-200">
-                            <h3 class="font-bold text-lg text-gray-800 ">${lesson.name}</h3>
-                            <button class="w-5 remove-lesson-btn text-red-500 hover:text-red-700 ml-2" data-id="${lesson.id}">
-                                <i class="fas fa-times-circle text-2xl"></i>
-                            </button>
-                        </div>
-                        <div class="p-4 bg-emerald-50 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                            <div class="lg:flex-grow">
-                                <label class="text-base font-semibold text-gray-700 block mb-2">Score</label>
-                                <p style="font-size: 12px; color: #9CA3AF; font-style: italic;">Note: Score are taken from Lesson Quiz result. Score will not be displayed in the Daily Journal.</p>
+                return `
+                    <div class="student-card ${isSent ? 'sent' : ''}">
+                        <div class="student-info">
+                            <div class="student-avatar">${initials}</div>
+                            <div class="student-details">
+                                <h3>${student.name}</h3>
+                                <p>📱 ${student.parentPhone.replace(/(\d{2})(\d{4})(\d{4})(\d{4})/, '+$1 $2 $3 $4')}</p>
                             </div>
-                            <div class="flex items-center gap-2 flex-shrink-0">
-                                <button class="score-preset" data-id="${lesson.id}" data-score="60">60</button>
-                                <button class="score-preset" data-id="${lesson.id}" data-score="75">75</button>
-                                <button class="score-preset" data-id="${lesson.id}" data-score="85">85</button>
-                                <input type="number" value="${lesson.score}" min="0" max="100"
-                                    class="lesson-number w-16 text-center bg-white border-2 border-gray-300 rounded-xl px-2 py-2 text-lg font-bold text-primary focus:border-primary"
-                                    data-id="${lesson.id}" onchange="autosaveData()">
-                                <span class="text-gray-400 text-base font-medium">/100</span>
-                            </div>
-                        </div>`;
-                    container.appendChild(div);
-                });
-
-                container.querySelectorAll('.lesson-number').forEach(inp => {
-                    inp.addEventListener('input', function () {
-                        const l = CONFIG.allLessons.find(x => x.id === parseInt(this.dataset.id));
-                        if (l) l.score = parseInt(this.value) || 0;
-                    });
-                });
-                container.querySelectorAll('.score-preset').forEach(btn => {
-                    btn.addEventListener('click', function () {
-                        const id = parseInt(this.dataset.id);
-                        const score = this.dataset.score;
-                        const inp = container.querySelector(`.lesson-number[data-id="${id}"]`);
-                        if (inp) inp.value = score;
-                        const l = CONFIG.allLessons.find(x => x.id === id);
-                        if (l) l.score = parseInt(score);
-                    });
-                });
-                container.querySelectorAll('.remove-lesson-btn').forEach(btn => {
-                    btn.addEventListener('click', function () {
-                        const l = CONFIG.allLessons.find(x => x.id === parseInt(this.dataset.id));
-                        if (l) { l.selected = false; renderSelectedLessons(); updateObjectives(); }
-                    });
-                });
-            }
-
-            // ---- Modal ----
-            const modal = document.getElementById('selectLessonsModal');
-            document.getElementById('selectLessonsBtn').addEventListener('click', () => {
-                tempSelections = {};
-                CONFIG.allLessons.forEach(l => tempSelections[l.id] = l.selected);
-                renderAllLessons();
-                modal.classList.add('open');
-            });
-            [document.getElementById('closeSelectModal'), document.getElementById('cancelSelectModal')].forEach(btn => {
-                btn.addEventListener('click', () => {
-                    CONFIG.allLessons.forEach(l => l.selected = tempSelections[l.id]);
-                    modal.classList.remove('open');
-                });
-            });
-            document.getElementById('confirmSelectModal').addEventListener('click', () => {
-                modal.classList.remove('open');
-                renderSelectedLessons();
-                updateObjectives();
-            });
-            document.getElementById('lessonSearch').addEventListener('input', function () {
-                const q = this.value.toLowerCase();
-                document.querySelectorAll('.modal-lesson-card').forEach(card => {
-                    card.style.display = card.querySelector('h3').innerText.toLowerCase().includes(q) ? 'block' : 'none';
-                });
-            });
-
-            function renderAllLessons() {
-                const container = document.getElementById('allLessonsContainer');
-                container.innerHTML = '';
-                CONFIG.allLessons.forEach(lesson => {
-                    const div = document.createElement('div');
-                    div.className = `modal-lesson-card border-2 rounded-xl p-3 cursor-pointer transition-all ${lesson.selected ? 'border-primary bg-emerald-50' : 'border-gray-200 bg-white hover:border-primary'}`;
-                    div.dataset.id = lesson.id;
-                    div.innerHTML = `
+                        </div>
                         <div class="flex items-center gap-3">
-                            <div class="w-6 h-6 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${lesson.selected ? 'bg-primary border-primary' : 'bg-white border-gray-300'}">
-                                <i class="fas fa-check text-white text-xs ${lesson.selected ? '' : 'hidden'}"></i>
+                            <div class="status-badge ${isSent ? 'completed' : ''}">
+                                ${isSent ? '<i class="fas fa-check-circle"></i> Sent' : isCompleted ? '<i class="fas fa-file-check"></i> Created' : '<i class="fas fa-file"></i> Not Started'}
                             </div>
-                            <div>
-                                <h3 class="font-semibold text-sm text-gray-800">${lesson.name}</h3>
-                                <p class="text-xs text-gray-400">${lesson.objectives.length} objectives</p>
+                            <div style="display: flex; gap: 8px;">
+                                ${!isCompleted ? `<button class="action-btn" onclick="createJournal(${student.id})">
+                                    <i class="fas fa-plus-circle"></i>
+                                    Create
+                                </button>` : ''}
+                                ${isCompleted && !isSent ? `
+                                    <button class="action-btn secondary" onclick="sendToParents(${student.id})">
+                                        <i class="fas fa-paper-plane"></i>
+                                        Send
+                                    </button>
+                                    <button class="action-btn secondary" onclick="editJournal(${student.id})">
+                                        <i class="fas fa-edit"></i>
+                                        Edit
+                                    </button>
+                                ` : ''}
+                                ${isSent ? `
+                                    <button class="action-btn secondary" onclick="editJournal(${student.id})">
+                                        <i class="fas fa-eye"></i>
+                                        View
+                                    </button>
+                                ` : ''}
                             </div>
-                        </div>`;
-                    div.addEventListener('click', () => { lesson.selected = !lesson.selected; renderAllLessons(); updateModalCount(); });
-                    container.appendChild(div);
-                });
-                updateModalCount();
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function createJournal(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+
+            // Store student data in localStorage
+            localStorage.setItem('currentStudent', JSON.stringify(student));
+            localStorage.setItem('journalData', JSON.stringify({
+                lessons: [],
+                photo: null,
+                project: '',
+                notes: '',
+                aiSummary: ''
+            }));
+
+            // Redirect to journal page
+            window.location.href = 'journal.html';
+        }
+
+        function editJournal(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+
+            // Store student data in localStorage
+            localStorage.setItem('currentStudent', JSON.stringify(student));
+            
+            // Redirect to journal page (will load existing data)
+            window.location.href = 'journal.html';
+        }
+
+        function sendToParents(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+
+            // Show confirmation
+            const confirmed = confirm(`Send journal for ${student.name} to parent?`);
+            if (!confirmed) return;
+
+            // Mark as sent
+            if (!journalsData[studentId]) journalsData[studentId] = {};
+            journalsData[studentId].sent = true;
+            journalsData[studentId].sentAt = new Date().toISOString();
+            localStorage.setItem('journalsData', JSON.stringify(journalsData));
+
+            // Update display
+            renderStudents();
+            updateStats();
+            
+            alert(`✓ Journal for ${student.name} sent to parent!`);
+        }
+
+        function loadJournalsFromStorage() {
+            const saved = localStorage.getItem('journalsData');
+            if (saved) {
+                journalsData = JSON.parse(saved);
             }
+        }
 
-            function updateModalCount() {
-                document.getElementById('modalSelectedCount').textContent = CONFIG.allLessons.filter(l => l.selected).length;
-            }
+        function updateStats() {
+            const created = Object.values(journalsData).filter(j => j.completed).length;
+            const sent = Object.values(journalsData).filter(j => j.sent).length;
 
-            function updateObjectives() {
-                const selected = CONFIG.allLessons.filter(l => l.selected);
-                const list = document.querySelector('.objectives-list');
-                const objs = selected.flatMap(l => l.objectives);
-                list.innerHTML = objs.length
-                    ? objs.map(o => `<li>${o}</li>`).join('')
-                    : '<li>No lessons selected yet</li>';
-            }
+            document.getElementById('createdCount').textContent = created;
+            document.getElementById('sentCount').textContent = sent;
+        }
 
-            // ---- Photo ----
-            const photoInput = document.getElementById('photoInput');
-            const photoUploadArea = document.getElementById('photoUploadArea');
-            const photoPreview = document.getElementById('photoPreview');
-            const photoPlaceholder = document.getElementById('photoPlaceholder');
-            const photoImg = document.getElementById('photoImg');
-
-            photoUploadArea.addEventListener('click', e => {
-                if (!e.target.closest('#removePhoto')) photoInput.click();
-            });
-            photoInput.addEventListener('change', function (e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = e => {
-                        uploadedPhoto = e.target.result;
-                        photoImg.src = uploadedPhoto;
-                        photoPreview.classList.remove('hidden');
-                        photoPlaceholder.classList.add('hidden');
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-            document.getElementById('removePhoto').addEventListener('click', e => {
-                e.stopPropagation();
-                uploadedPhoto = null;
-                photoInput.value = '';
-                photoPreview.classList.add('hidden');
-                photoPlaceholder.classList.remove('hidden');
-            });
-
-            // ---- Project Toggle ----
-            document.getElementById('projectToggle').addEventListener('change', function () {
-                const inp = document.getElementById('projectInput');
-                inp.disabled = !this.checked;
-                inp.classList.toggle('opacity-50', !this.checked);
-                inp.classList.toggle('bg-white', this.checked);
-                inp.classList.toggle('border-primary', this.checked);
-                if (this.checked) inp.focus(); else inp.value = '';
-            });
-
-            // ---- AI Generation ----
-            document.getElementById('generateAIBtn').addEventListener('click', function () {
-                const aiStatus = document.getElementById('aiStatus');
-                const aiSummary = document.getElementById('aiSummary');
-                aiStatus.textContent = 'Generating...';
-                aiStatus.className = 'text-sm text-purple-600 italic animate-pulse';
-                this.disabled = true; this.classList.add('opacity-50');
-
-                const selected = CONFIG.allLessons.filter(l => l.selected);
-                const project = document.getElementById('projectInput').value.trim();
-                const notes = document.getElementById('teacherNotes').value.trim();
-
-                setTimeout(() => {
-                    let summary = `Today, ${CONFIG.student.name} demonstrated strong engagement across ${selected.length} lesson${selected.length !== 1 ? 's' : ''}. `;
-                    if (selected.length) {
-                        const avg = Math.round(selected.reduce((s, l) => s + l.score, 0) / selected.length);
-                        summary += `The student achieved an average performance score of ${avg}/100, `;
-                        const top = selected.reduce((m, l) => l.score > m.score ? l : m);
-                        summary += `with particularly strong performance in "${top.name}" (${top.score}/100). `;
-                    }
-                    if (project) summary += `Significant progress was made on the "${project}" project. `;
-                    summary += notes ? `Teacher observations: ${notes}` : `The student showed consistent effort and engagement throughout the session.`;
-
-                    aiSummary.textContent = summary;
-                    aiSummary.className = 'text-base text-gray-700 leading-relaxed min-h-[100px]';
-                    aiStatus.textContent = 'Generated ✓';
-                    aiStatus.className = 'text-sm text-green-600 italic font-semibold';
-                    this.disabled = false; this.classList.remove('opacity-50');
-                    this.innerHTML = '<i class="fas fa-check text-2xl"></i> Summary Generated!';
-                    setTimeout(() => { this.innerHTML = '<i class="fas fa-robot text-2xl"></i> Generate AI Summary'; }, 3000);
-                }, 2000);
-            });
-
-            // Desktop Save Journal Button - Main handler
-            const saveJournalDesktop = document.getElementById('saveJournalDesktop');
-            if (saveJournalDesktop) {
-                saveJournalDesktop.addEventListener('click', function () {
-                    const student = JSON.parse(localStorage.getItem('currentStudent') || 'null');
-                    if (!student) {
-                        alert('Student information not found');
-                        return;
-                    }
-                    autosaveData();
-                    
-                    // Mark as completed but NOT sent
-                    let journalsData = JSON.parse(localStorage.getItem('journalsData') || '{}');
-                    if (!journalsData[student.id]) journalsData[student.id] = {};
-                    journalsData[student.id].completed = true;
-                    journalsData[student.id].sent = false;
-                    journalsData[student.id].savedAt = new Date().toISOString();
-                    localStorage.setItem('journalsData', JSON.stringify(journalsData));
-                    
-                    alert('✓ Journal saved successfully!');
-                    window.location.href = 'student-list.html';
-                });
-
-                // Desktop Save Journal Button - Visual feedback
-                saveJournalDesktop.addEventListener('click', function () {
-                    this.innerHTML = '<i class="fas fa-check text-xs"></i> Saved!';
-                    setTimeout(() => { this.innerHTML = '<i class="fas fa-save text-xs"></i> Save'; }, 2000);
-                });
-            }
-
-            // ---- Save Journal ----
-            document.getElementById('saveJournalBtn').addEventListener('click', function () {
-                this.innerHTML = '<i class="fas fa-check"></i> Saved!';
-                setTimeout(() => { this.innerHTML = '<i class="fas fa-save text-xl"></i> Save Journal'; }, 2000);
-            });
-        });
+        // Initialize page on load
+        document.addEventListener('DOMContentLoaded', initPage);
     </script>
 </body>
 
