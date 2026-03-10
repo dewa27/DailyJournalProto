@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quick Report — Daily Journal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#10af13",
+            primaryDark: "#0d8610",
+          },
+          fontFamily: {
+            sans: ['DM Sans', 'sans-serif'],
+            serif: ['DM Serif Display', 'serif'],
+          }
+        },
+      },
+    };
+  </script>
+  <style>
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+
+    .step-content {
+      display: none;
+    }
+
+    .step-content.active {
+      display: block;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .sidebar-nav {
+      min-width: 260px;
+      max-width: 260px;
+    }
+
+    .step-tab {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #6b7280;
+      font-weight: 500;
+      border: 2px solid transparent;
+    }
+
+    .step-tab:hover {
+      background: #f0fdf4;
+      color: #10af13;
+    }
+
+    .step-tab.active {
+      background: #ecfdf5;
+      color: #10af13;
+      border-color: #a7f3d0;
+    }
+
+    .step-tab.completed {
+      background: #f0fdf4;
+      color: #10b981;
+    }
+
+    .step-tab.completed .tab-num {
+      background: #10b981;
+      color: white;
+    }
+
+    .step-tab.active .tab-num {
+      background: #10af13;
+      color: white;
+    }
+
+    .tab-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #e5e7eb;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .progress-line {
+      width: 2px;
+      height: 28px;
+      background: #e5e7eb;
+      margin: 4px 0 4px 33px;
+    }
+
+    .progress-line.done {
+      background: #10b981;
+    }
+
+    .card {
+      background: white;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .card-sm {
+      padding: 18px;
+    }
+
+    .score-preset {
+      flex: 1;
+      padding: 8px 4px;
+      background: white;
+      border: 1.5px solid #d1d5db;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #374151;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .score-preset:hover {
+      border-color: #10af13;
+      color: #10af13;
+      background: #f0fdf4;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: white;
+      border-radius: 20px;
+      width: 520px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+    }
+
+    .lesson-card-selected {
+      background: white;
+      border: 1.5px solid #10af13;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    textarea:focus,
+    input:focus {
+      outline: none;
+    }
+
+    .action-btn {
+      padding: 12px 28px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #10af13, #4ec148);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(16, 175, 19, 0.3);
+    }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      border: 1.5px solid #e5e7eb;
+    }
+
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+
+    .btn-purple {
+      background: linear-gradient(135deg, #7c3aed, #9333ea);
+      color: white;
+    }
+
+    .btn-purple:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3);
+    }
+
+    .main-content {
+      flex: 1;
+      min-width: 0;
+      overflow-y: auto;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+
+    /* A4 Preview Styling */
+    .a4-preview {
+      max-width: 100%;
+      background: white;
+      box-shadow: 0 0 0 1px #e5e7eb;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+
+    .a4-header {
+      background: linear-gradient(135deg, #10af13, #4ec148);
+      color: white;
+      padding: 28px 24px 20px;
+      border-bottom: 2px solid #0d8610;
+      flex-shrink: 0;
+    }
+
+    .a4-header h1 {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      font-family: 'DM Serif Display', serif;
+    }
+
+    .a4-header-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      font-size: 14px;
+    }
+
+    .a4-header-column {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .a4-header-item span {
+      display: block;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.85);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .a4-header-item strong {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .a4-content {
+      padding: 20px;
+      flex: 1;
+      font-size: 13px;
+    }
+
+    .a4-section {
+      margin-bottom: 16px;
+      page-break-inside: avoid;
+    }
+
+    .a4-section-title {
+      font-weight: 700;
+      color: #10af13;
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .a4-photo {
+      width: 100%;
+      max-height: 80mm;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      margin-bottom: 12px;
+    }
+
+    .a4-list {
+      margin-left: 12px;
+      color: #374151;
+    }
+
+    .a4-list li {
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .a4-performance-item {
+      background: #f9fafb;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .a4-performance-item .score {
+      font-weight: 700;
+      color: #10af13;
+    }
+
+    .lesson-with-objectives {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+
+    .lesson-header {
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .lesson-header:hover {
+      background: #f3f4f6;
+    }
+
+    .lesson-toggle-icon {
+      color: #10af13;
+      font-size: 14px;
+      transition: transform 0.2s;
+    }
+
+    .lesson-toggle-icon.expanded {
+      transform: rotate(180deg);
+    }
+
+    .lesson-objectives {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .lesson-objectives.expanded {
+      max-height: 500px;
+    }
+
+    .lesson-objectives ul {
+      list-style: disc;
+      padding: 10px 12px 10px 28px;
+      margin: 0;
+      font-size: 12px;
+      color: #374151;
+    }
+
+    .lesson-objectives li {
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+
+    @media print {
+      .lesson-toggle-icon {
+        display: none !important;
+      }
+
+      .lesson-objectives {
+        max-height: none !important;
+        border-top: 1px solid #e5e7eb;
+      }
+
+      .lesson-objectives ul {
+        padding: 10px 12px 10px 28px;
+      }
+    }
+
+    .a4-info-box {
+      background: #f0fdf4;
+      padding: 12px;
+      border-left: 3px solid #10af13;
+      border-radius: 4px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #374151;
+    }
+
+    .a4-footer {
+      background: #f3f4f6;
+      padding: 12px 16px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 11px;
+      color: #6b7280;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    @media print {
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: white;
+        display: flex;
+        justify-content: center;
+      }
+      header,
+      aside,
+      .main-content,
+      .flex {
+        display: none !important;
+      }
+      .a4-preview {
+        width: 210mm;
+        height: 297mm;
+        max-width: 100% !important;
+        display: flex !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .a4-header {
+        padding: 20mm 16mm 14mm !important;
+      }
+      .a4-content {
+        padding: 16mm !important;
+        overflow-y: auto !important;
+      }
+      .a4-footer {
+        padding: 12mm 16mm !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 h-screen flex flex-col overflow-hidden">
+
+  <!-- Top Header Bar -->
+  <header class="bg-primary text-white shadow-lg flex-shrink-0 z-30">
+    <div class="px-8 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center font-bold text-lg font-serif">I
+        </div>
+        <div>
+          <p id="studentName" class="font-semibold text-base leading-tight">Ivan Gunaguna</p>
+          <p class="text-emerald-100 text-sm">
+            ID: <span id="studentId">12833</span> &bull;
+            <span id="studentClass">27A - Python</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-6">
+        <div class="text-right">
+          <p class="font-semibold text-base leading-tight">23 Maret 2026</p>
+          <p class="text-emerald-100 text-sm">09:00 WIB</p>
+        </div>
+        <span class="bg-white/20 border border-white/30 px-4 py-1.5 rounded-full text-sm font-semibold">
+          <i class="fas fa-circle text-xs mr-1 opacity-70"></i> Draft
+        </span>
+        <div class="font-serif text-lg font-bold tracking-wide opacity-90">Daily Journal</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Body: Sidebar + Main -->
+  <div class="flex flex-1 min-h-0">
+
+    <!-- Sidebar -->
+    <aside class="sidebar-nav bg-white border-r border-gray-200 flex flex-col p-6 flex-shrink-0">
+      <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-5">Progress</p>
+
+      <div id="tab1" class="step-tab active" onclick="goToStep(1)">
+        <div class="tab-num">1</div>
+        <div>
+          <div class="text-sm font-semibold">Lessons</div>
+          <div class="text-xs text-gray-400 font-normal">Covered topics & photo</div>
+        </div>
+      </div>
+      <div class="progress-line" id="line1"></div>
+
+      <div id="tab2" class="step-tab" onclick="goToStep(2)">
+        <div class="tab-num">2</div>
+        <div>
+          <div class="text-sm font-semibold">Details</div>
+          <div class="text-xs text-gray-400 font-normal">Project & observations</div>
+        </div>
+      </div>
+      <div class="progress-line" id="line2"></div>
+
+      <div id="tab3" class="step-tab" onclick="goToStep(3)">
+        <div class="tab-num">3</div>
+        <div>
+          <div class="text-sm font-semibold">Review</div>
+          <div class="text-xs text-gray-400 font-normal">Preview & submit</div>
+        </div>
+      </div>
+
+      <div class="mt-auto pt-6 border-t border-gray-100 text-xs text-gray-400 space-y-1">
+        <p>Teacher: <span class="font-semibold text-gray-600">Mr. Muscle</span></p>
+        <p>Report <span class="font-semibold text-gray-600">#001</span></p>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content p-8">
+
+      <!-- ===== STEP 1 ===== -->
+      <div id="step1" class="step-content active max-w-4xl mx-auto">
+        <div class="flex items-start justify-between mb-6">
+          <div>
+            <h2 class="text-2xl font-serif font-bold text-gray-800 mb-1">Covered Lessons</h2>
+            <p class="text-gray-500">Select lessons covered in this meeting and attach an evidence photo.</p>
+          </div>
+          <button id="selectLessonsBtn" class="action-btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Add Lessons
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+          <!-- Left col: Lessons -->
+          <div>
+            <div id="selectedLessonsContainer" class="space-y-3 mb-4"></div>
+            <div id="noLessonsMessage" class="card text-center py-12">
+              <i class="fas fa-book-open text-4xl text-gray-300 mb-3 block"></i>
+              <p class="font-semibold text-gray-500 mb-1">No Lessons Selected</p>
+              <p class="text-sm text-gray-400">Click "Add Lessons" to get started</p>
+            </div>
+          </div>
+
+          <!-- Right col: Photo + Objectives -->
+          <div class="space-y-5">
+            <!-- Photo Upload -->
+            <div
+              class="card card-sm border-dashed border-2 border-gray-300 hover:border-primary hover:bg-emerald-50 transition-all cursor-pointer text-center"
+              id="photoUploadArea">
+              <input type="file" id="photoInput" accept="image/*" class="hidden" />
+              <div id="photoPreview" class="hidden">
+                <img id="photoImg" class="w-full h-48 object-contain rounded-lg mb-3" />
+                <button id="removePhoto" class="action-btn bg-red-500 text-white hover:bg-red-600 text-sm py-2 px-4">
+                  <i class="fas fa-trash-alt"></i> Remove
+                </button>
+              </div>
+              <div id="photoPlaceholder">
+                <i class="fas fa-camera text-4xl text-gray-300 mb-3 block"></i>
+                <p class="font-semibold text-gray-600 mb-1">Add Evidence Photo</p>
+                <p class="text-sm text-gray-400 mb-3">Click to upload class activity photo</p>
+                <span class="action-btn btn-primary text-sm py-2 px-4 pointer-events-none">
+                  <i class="fas fa-upload"></i> Choose Photo
+                </span>
+              </div>
+            </div>
+
+            <!-- Objectives -->
+            <div class="card card-sm bg-gradient-to-br from-emerald-50 to-white border-emerald-200">
+              <div class="flex items-center gap-2 mb-3">
+                <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                  <i class="fas fa-bullseye text-white text-sm"></i>
+                </div>
+                <h3 class="font-bold text-gray-800">Lesson Objectives</h3>
+              </div>
+              <ul class="objectives-list text-sm text-gray-700 space-y-1.5 pl-5 list-disc">
+                <li class="text-gray-400">No lessons selected yet</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer actions -->
+        <div class="flex justify-end mt-8 pt-6 border-t border-gray-200">
+          <button id="nextToStep2" class="action-btn btn-primary">
+            Continue to Details <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== STEP 2 ===== -->
+      <div id="step2" class="step-content max-w-4xl mx-auto">
+        <div class="mb-6">
+          <h2 class="text-2xl font-serif font-bold text-gray-800 mb-1">Add Details</h2>
+          <p class="text-gray-500">Add project context and teacher observations.</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+          <!-- Left: Project + Notes -->
+          <div class="space-y-5">
+            <!-- Active Project -->
+            <div class="card card-sm">
+              <label class="flex items-center justify-between mb-3">
+                <span class="font-bold text-gray-800">Active Project</span>
+                <input type="checkbox" id="projectToggle" class="w-5 h-5 accent-emerald-500 cursor-pointer" />
+              </label>
+              <input id="projectInput" type="text" placeholder="e.g., Snake Game Development"
+                class="w-full bg-gray-100 border-2 border-gray-300 rounded-xl px-4 py-3 text-sm opacity-50 transition-all"
+                disabled />
+            </div>
+
+            <!-- Notes -->
+            <div class="card card-sm">
+              <label class="font-bold text-gray-800 block mb-3">Teacher Notes</label>
+              <textarea id="teacherNotes" rows="7" placeholder="Write notes about student's performance..."
+                class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 text-sm resize-none focus:border-primary transition-colors"></textarea>
+            </div>
+          </div>
+
+          <!-- Right: Generate AI + Summary -->
+          <div class="space-y-5">
+            <button id="generateAIBtn" class="w-full action-btn btn-purple justify-center py-4 text-base">
+              <i class="fas fa-robot text-lg"></i> Generate AI Summary
+            </button>
+
+            <div class="card card-sm flex-1">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-gray-800">AI Summary</h3>
+                <span id="aiStatus" class="text-xs text-gray-400 italic">Not generated</span>
+              </div>
+              <div id="aiSummary" class="text-sm text-gray-500 leading-relaxed min-h-[180px]">
+                Click "Generate AI Summary" to create an intelligent report based on selected lessons and
+                observations...
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-between mt-8 pt-6 border-t border-gray-200">
+          <button id="backToStep1" class="action-btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back
+          </button>
+          <button id="nextToStep3" class="action-btn btn-primary">
+            Continue to Review <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== STEP 3 ===== -->
+      <div id="step3" class="step-content">
+        <div class="mb-6">
+          <h2 class="text-2xl font-serif font-bold text-gray-800 mb-1">Review Report</h2>
+          <p class="text-gray-500">Review your A4-sized Daily Journal before saving.</p>
+        </div>
+
+        <!-- A4 Preview -->
+        <div class="a4-preview">
+          <!-- A4 Header -->
+          <div class="a4-header">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px;">
+          <h1 style="font-size: 28px; font-weight: bold; margin: 0; font-family: 'DM Serif Display', serif;">Daily Journal</h1>
+          <img src="https://infolomba.id/images/event/logo/timedoor-academy-27.png" alt="Company Logo" style="height: 45px; width: auto;" />
+        </div>
+            <div class="a4-header-meta">
+              <div class="a4-header-column">
+                <div class="a4-header-item">
+                  <span>Student</span>
+                  <strong id="a4Student">Ivan Gunaguna</strong>
+                </div>
+                <div class="a4-header-item">
+                  <span>Class</span>
+                  <strong id="a4Class">27A - Python</strong>
+                </div>
+                <div class="a4-header-item">
+                  <span>Book Name</span>
+                  <strong id="a4BookName">Daily Journal</strong>
+                </div>
+              </div>
+              <div class="a4-header-column">
+                <div class="a4-header-item">
+                  <span>Date & Time</span>
+                  <strong id="a4DateTime">-</strong>
+                </div>
+                <div class="a4-header-item">
+                  <span>Teacher</span>
+                  <strong id="a4Teacher">Mr. Muscle</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- A4 Content -->
+          <div class="a4-content">
+            <!-- Photo -->
+            <div id="a4PhotoSection" style="display:none;" class="a4-section">
+              <img id="a4Photo" class="a4-photo" />
+            </div>
+
+            <!-- Covered Lessons -->
+            <div id="a4CoveredLessonsSection" class="a4-section">
+              <div class="a4-section-title">
+                <i class="fas fa-book-open"></i> Covered Lessons
+              </div>
+              <div id="a4CoveredLessons" class="a4-list" style="margin-left: 0;">
+                <p class="text-gray-400 text-12px">No lessons selected</p>
+              </div>
+              <p style="font-size: 11px; color: #9CA3AF; margin-top: 8px; font-style: italic;">Note: Performance scores are used for tracking but not displayed in the final journal.</p>
+            </div>
+
+            <!-- AI Summary & Active Project Grid -->
+            <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 16px; margin-bottom: 16px;">
+              <!-- AI Summary -->
+              <div id="a4AISummarySection" style="display:none;" class="a4-section">
+                <div class="a4-section-title">
+                  <i class="fas fa-robot"></i> AI-Generated Summary
+                </div>
+                <div id="a4AISummary" class="a4-info-box"></div>
+              </div>
+
+              <!-- Active Project -->
+              <div id="a4ProjectSection" style="display:none;" class="a4-section">
+                <div class="a4-section-title">
+                  <i class="fas fa-project-diagram"></i> Active Project
+                </div>
+                <div class="a4-info-box">
+                  <strong id="a4Project"></strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- AI Summary -->
+            <div id="a4AISummarySection" style="display:none;" class="a4-section">
+              <div class="a4-section-title">
+                <i class="fas fa-robot"></i> AI-Generated Summary
+              </div>
+              <div id="a4AISummary" class="a4-info-box"></div>
+            </div>
+          </div>
+
+          <!-- A4 Footer -->
+          <div class="a4-footer">
+            <span>Report #001</span>
+            <span>© 2026 Daily Journal System</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="max-w-4xl mx-auto mt-8">
+          <div class="card card-sm bg-blue-50 border-blue-200 mb-4">
+            <div class="flex items-start gap-3">
+              <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+              <div class="text-sm text-blue-700">
+                <p class="font-semibold mb-1">Ready to Export</p>
+                <p class="text-blue-600">This preview will be formatted as A4 (210 × 297 mm) when exported as PDF or printed. You can review all your entries from Steps 1 & 2 above.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-4 justify-between">
+            <button id="backToStep2" class="action-btn btn-secondary">
+              <i class="fas fa-arrow-left"></i> Back to Edit
+            </button>
+            <div class="flex gap-3">
+              <button id="printBtn" class="action-btn btn-secondary" onclick="window.print()">
+                <i class="fas fa-print"></i> Print / Export PDF
+              </button>
+              <button id="saveJournalBtn" class="action-btn btn-primary">
+                <i class="fas fa-save text-lg"></i> Save Journal
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ===== Select Lessons Modal ===== -->
+  <div id="selectLessonsModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="bg-primary text-white px-6 py-4 rounded-t-[20px] flex justify-between items-center flex-shrink-0">
+        <h2 class="font-serif font-bold text-lg">Select Covered Lessons</h2>
+        <button id="closeSelectModal"
+          class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="px-5 py-3 bg-gray-50 border-b flex-shrink-0">
+        <div class="relative">
+          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+          <input type="text" id="lessonSearch" placeholder="Search lessons..."
+            class="w-full pl-9 pr-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-sm focus:border-primary transition-colors" />
+        </div>
+      </div>
+
+      <div class="px-5 py-2 bg-emerald-50 border-b text-sm text-gray-600 flex-shrink-0">
+        <span id="modalSelectedCount" class="font-bold text-primary">0</span> lessons selected
+      </div>
+
+      <div class="flex-grow overflow-y-auto p-5">
+        <div id="allLessonsContainer" class="space-y-2.5"></div>
+      </div>
+
+      <div class="bg-white px-5 py-4 border-t rounded-b-[20px] flex gap-3 flex-shrink-0">
+        <button id="cancelSelectModal" class="action-btn btn-secondary flex-1 justify-center py-3">Cancel</button>
+        <button id="confirmSelectModal" class="action-btn btn-primary flex-1 justify-center py-3">Confirm
+          Selection</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CONFIG = {
+      student: { name: "Ivan Gunaguna", id: "12833", class: "27A - Python" },
+      teacher: { name: "Mr. Muscle" },
+      allLessons: [
+        { id: 1, name: "Lesson 1 - Introduction to Pygame", score: 85, selected: true, objectives: ["Introducing concepts related to Game development", "Know how to develop games using Pygame", "Know how to set the environment in Pygame"] },
+        { id: 2, name: "Lesson 2 - Add Another Sprite for Snake Game", score: 92, selected: true, objectives: ["Know how to initialize FPS in Pygame", "Add another object to the Pygame canvas", "Understand list operations in Python"] },
+        { id: 3, name: "Lesson 3 - Working with Sprites", score: 0, selected: false, objectives: ["Understand sprite concepts in Pygame", "Know how to manipulate sprites effectively"] },
+        { id: 4, name: "Lesson 4 - Collision Detection", score: 0, selected: false, objectives: ["Know how to detect collisions in games", "Implement collision responses"] },
+        { id: 5, name: "Lesson 5 - Game Sound Effects", score: 0, selected: false, objectives: ["Learn to add sound effects in Pygame", "Manage background music"] },
+        { id: 6, name: "Lesson 6 - Scoring System", score: 0, selected: false, objectives: ["Implement scoring and game states", "Create win/lose conditions"] },
+        { id: 7, name: "Lesson 7 - Player Controls", score: 0, selected: false, objectives: ["Handle keyboard and mouse input", "Implement smooth player movement"] },
+        { id: 8, name: "Lesson 8 - Game Animations", score: 0, selected: false, objectives: ["Create sprite animations", "Use sprite sheets effectively"] },
+        { id: 9, name: "Lesson 9 - Level Design", score: 0, selected: false, objectives: ["Design engaging game levels", "Implement level progression"] },
+        { id: 10, name: "Lesson 10 - Final Project", score: 0, selected: false, objectives: ["Combine all learned concepts", "Create a complete game"] },
+      ],
+    };
+
+    let uploadedPhoto = null;
+    let tempSelections = {};
+    let currentStep = 1;
+
+    // ---- Step Navigation ----
+    function goToStep(step) {
+      document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
+      document.getElementById(`step${step}`).classList.add('active');
+      currentStep = step;
+      updateTabs();
+      if (step === 3) updatePreview();
+    }
+
+    function updateTabs() {
+      [1, 2, 3].forEach(n => {
+        const tab = document.getElementById(`tab${n}`);
+        const circle = tab.querySelector('.tab-num');
+        tab.classList.remove('active', 'completed');
+        if (n < currentStep) {
+          tab.classList.add('completed');
+          circle.innerHTML = '<i class="fas fa-check text-xs"></i>';
+        } else if (n === currentStep) {
+          tab.classList.add('active');
+          circle.textContent = n;
+        } else {
+          circle.textContent = n;
+        }
+        if (n < 3) {
+          const line = document.getElementById(`line${n}`);
+          line.classList.toggle('done', n < currentStep);
+        }
+      });
+    }
+
+    // ---- Preview ----
+    function updatePreview() {
+      // Update A4 Header
+      document.getElementById('a4Student').textContent = CONFIG.student.name;
+      document.getElementById('a4Class').textContent = CONFIG.student.class;
+      document.getElementById('a4BookName').textContent = 'Daily Journal';
+      document.getElementById('a4Teacher').textContent = CONFIG.teacher.name;
+      const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      document.getElementById('a4DateTime').textContent = `${dateStr} • 09:00`;
+
+      // Update Photo
+      const photoSection = document.getElementById('a4PhotoSection');
+      if (uploadedPhoto) { 
+        document.getElementById('a4Photo').src = uploadedPhoto; 
+        photoSection.style.display = 'block'; 
+      }
+      else photoSection.style.display = 'none';
+
+      // Update Covered Lessons
+      const coveredLessonsContainer = document.getElementById('a4CoveredLessons');
+      const selectedLessons = CONFIG.allLessons.filter(l => l.selected);
+      coveredLessonsContainer.innerHTML = '';
+      if (selectedLessons.length) {
+        selectedLessons.forEach(lesson => {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'lesson-with-objectives';
+          
+          const header = document.createElement('div');
+          header.className = 'lesson-header';
+          header.innerHTML = `
+            <div style="flex: 1;">
+              <strong style="color: #10af13; font-size: 13px;">${lesson.name}</strong>
+            </div>
+            <i class="fas fa-chevron-down lesson-toggle-icon"></i>
+          `;
+          
+          const objectivesDiv = document.createElement('div');
+          objectivesDiv.className = 'lesson-objectives';
+          
+          if (lesson.objectives && lesson.objectives.length > 0) {
+            objectivesDiv.innerHTML = '<ul>' + lesson.objectives.map(obj => `<li>${obj}</li>`).join('') + '</ul>';
+          }
+          
+          header.addEventListener('click', function() {
+            objectivesDiv.classList.toggle('expanded');
+            header.querySelector('.lesson-toggle-icon').classList.toggle('expanded');
+          });
+          
+          wrapper.appendChild(header);
+          wrapper.appendChild(objectivesDiv);
+          coveredLessonsContainer.appendChild(wrapper);
+        });
+      } else {
+        coveredLessonsContainer.innerHTML = '<p class="text-gray-400 text-sm">No lessons selected</p>';
+      }
+
+      // Update Project
+      const project = document.getElementById('projectInput').value.trim();
+      const projSec = document.getElementById('a4ProjectSection');
+      if (project) { 
+        document.getElementById('a4Project').textContent = project; 
+        projSec.style.display = 'block'; 
+      }
+      else projSec.style.display = 'none';
+
+      // Update AI Summary
+      const aiSummary = document.getElementById('aiSummary');
+      const aiStatus = document.getElementById('aiStatus');
+      const aiSec = document.getElementById('a4AISummarySection');
+      if (aiSummary.textContent && aiStatus.textContent === 'Generated ✓') {
+        document.getElementById('a4AISummary').textContent = aiSummary.textContent;
+        aiSec.style.display = 'block';
+      } else aiSec.style.display = 'none';
+
+
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      renderSelectedLessons();
+      updateObjectives();
+      updateTabs();
+
+      // Navigation
+      document.getElementById('nextToStep2').addEventListener('click', () => goToStep(2));
+      document.getElementById('backToStep1').addEventListener('click', () => goToStep(1));
+      document.getElementById('nextToStep3').addEventListener('click', () => goToStep(3));
+      document.getElementById('backToStep2').addEventListener('click', () => goToStep(2));
+
+      // ---- Render Selected Lessons ----
+      function renderSelectedLessons() {
+        const container = document.getElementById('selectedLessonsContainer');
+        const noMsg = document.getElementById('noLessonsMessage');
+        container.innerHTML = '';
+        const selected = CONFIG.allLessons.filter(l => l.selected);
+
+        if (!selected.length) { noMsg.classList.remove('hidden'); return; }
+        noMsg.classList.add('hidden');
+
+        selected.forEach(lesson => {
+          const div = document.createElement('div');
+          div.className = 'lesson-card-selected';
+          div.innerHTML = `
+                        <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between gap-2">
+                            <h3 class="font-semibold text-sm text-gray-800 flex-grow">${lesson.name}</h3>
+                            <button class="remove-lesson-btn text-red-400 hover:text-red-600 p-1 transition-colors" data-id="${lesson.id}">
+                                <i class="fas fa-times-circle"></i>
+                            </button>
+                        </div>
+                        <div class="px-4 py-3 bg-emerald-50">
+                            <p class="text-xs font-semibold text-gray-500 mb-2">Performance Score</p>
+                            <div class="flex items-center gap-2">
+                                <button class="score-preset" data-id="${lesson.id}" data-score="60">60</button>
+                                <button class="score-preset" data-id="${lesson.id}" data-score="75">75</button>
+                                <button class="score-preset" data-id="${lesson.id}" data-score="85">85</button>
+                                <button class="score-preset" data-id="${lesson.id}" data-score="100">100</button>
+                                <input type="number" value="${lesson.score}" min="0" max="100"
+                                    class="lesson-number w-16 text-center bg-white border-2 border-gray-200 rounded-xl px-2 py-2 text-xl font-bold text-primary focus:border-primary"
+                                    data-id="${lesson.id}">
+                                <span class="text-gray-400 text-sm">/100</span>
+                            </div>
+                        </div>`;
+          container.appendChild(div);
+        });
+
+        container.querySelectorAll('.lesson-number').forEach(inp => {
+          inp.addEventListener('input', function () {
+            const l = CONFIG.allLessons.find(x => x.id === parseInt(this.dataset.id));
+            if (l) l.score = parseInt(this.value) || 0;
+          });
+        });
+        container.querySelectorAll('.score-preset').forEach(btn => {
+          btn.addEventListener('click', function () {
+            const id = parseInt(this.dataset.id);
+            const score = this.dataset.score;
+            const inp = container.querySelector(`.lesson-number[data-id="${id}"]`);
+            if (inp) inp.value = score;
+            const l = CONFIG.allLessons.find(x => x.id === id);
+            if (l) l.score = parseInt(score);
+          });
+        });
+        container.querySelectorAll('.remove-lesson-btn').forEach(btn => {
+          btn.addEventListener('click', function () {
+            const l = CONFIG.allLessons.find(x => x.id === parseInt(this.dataset.id));
+            if (l) { l.selected = false; renderSelectedLessons(); updateObjectives(); }
+          });
+        });
+      }
+
+      // ---- Modal ----
+      const modal = document.getElementById('selectLessonsModal');
+      document.getElementById('selectLessonsBtn').addEventListener('click', () => {
+        tempSelections = {};
+        CONFIG.allLessons.forEach(l => tempSelections[l.id] = l.selected);
+        renderAllLessons();
+        modal.classList.add('open');
+      });
+      [document.getElementById('closeSelectModal'), document.getElementById('cancelSelectModal')].forEach(btn => {
+        btn.addEventListener('click', () => {
+          CONFIG.allLessons.forEach(l => l.selected = tempSelections[l.id]);
+          modal.classList.remove('open');
+        });
+      });
+      document.getElementById('confirmSelectModal').addEventListener('click', () => {
+        modal.classList.remove('open');
+        renderSelectedLessons();
+        updateObjectives();
+      });
+      document.getElementById('lessonSearch').addEventListener('input', function () {
+        const q = this.value.toLowerCase();
+        document.querySelectorAll('.modal-lesson-card').forEach(card => {
+          card.style.display = card.querySelector('h3').innerText.toLowerCase().includes(q) ? 'block' : 'none';
+        });
+      });
+
+      function renderAllLessons() {
+        const container = document.getElementById('allLessonsContainer');
+        container.innerHTML = '';
+        CONFIG.allLessons.forEach(lesson => {
+          const div = document.createElement('div');
+          div.className = `modal-lesson-card border-2 rounded-xl p-3 cursor-pointer transition-all ${lesson.selected ? 'border-primary bg-emerald-50' : 'border-gray-200 bg-white hover:border-primary'}`;
+          div.dataset.id = lesson.id;
+          div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${lesson.selected ? 'bg-primary border-primary' : 'bg-white border-gray-300'}">
+                                <i class="fas fa-check text-white text-xs ${lesson.selected ? '' : 'hidden'}"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-sm text-gray-800">${lesson.name}</h3>
+                                <p class="text-xs text-gray-400">${lesson.objectives.length} objectives</p>
+                            </div>
+                        </div>`;
+          div.addEventListener('click', () => { lesson.selected = !lesson.selected; renderAllLessons(); updateModalCount(); });
+          container.appendChild(div);
+        });
+        updateModalCount();
+      }
+
+      function updateModalCount() {
+        document.getElementById('modalSelectedCount').textContent = CONFIG.allLessons.filter(l => l.selected).length;
+      }
+
+      function updateObjectives() {
+        const selected = CONFIG.allLessons.filter(l => l.selected);
+        const list = document.querySelector('.objectives-list');
+        const objs = selected.flatMap(l => l.objectives);
+        list.innerHTML = objs.length
+          ? objs.map(o => `<li>${o}</li>`).join('')
+          : '<li class="text-gray-400">No lessons selected yet</li>';
+      }
+
+      // ---- Photo ----
+      const photoInput = document.getElementById('photoInput');
+      const photoUploadArea = document.getElementById('photoUploadArea');
+      const photoPreview = document.getElementById('photoPreview');
+      const photoPlaceholder = document.getElementById('photoPlaceholder');
+      const photoImg = document.getElementById('photoImg');
+
+      photoUploadArea.addEventListener('click', e => {
+        if (!e.target.closest('#removePhoto')) photoInput.click();
+      });
+      photoInput.addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = e => {
+            uploadedPhoto = e.target.result;
+            photoImg.src = uploadedPhoto;
+            photoPreview.classList.remove('hidden');
+            photoPlaceholder.classList.add('hidden');
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+      document.getElementById('removePhoto').addEventListener('click', e => {
+        e.stopPropagation();
+        uploadedPhoto = null;
+        photoInput.value = '';
+        photoPreview.classList.add('hidden');
+        photoPlaceholder.classList.remove('hidden');
+      });
+
+      // ---- Project Toggle ----
+      document.getElementById('projectToggle').addEventListener('change', function () {
+        const inp = document.getElementById('projectInput');
+        inp.disabled = !this.checked;
+        inp.classList.toggle('opacity-50', !this.checked);
+        inp.classList.toggle('bg-white', this.checked);
+        inp.classList.toggle('border-primary', this.checked);
+        if (this.checked) inp.focus(); else inp.value = '';
+      });
+
+      // ---- AI Generation ----
+      document.getElementById('generateAIBtn').addEventListener('click', function () {
+        const aiStatus = document.getElementById('aiStatus');
+        const aiSummary = document.getElementById('aiSummary');
+        aiStatus.textContent = 'Generating...';
+        aiStatus.className = 'text-xs text-purple-500 italic animate-pulse';
+        this.disabled = true; this.classList.add('opacity-50');
+
+        const selected = CONFIG.allLessons.filter(l => l.selected);
+        const project = document.getElementById('projectInput').value.trim();
+        const notes = document.getElementById('teacherNotes').value.trim();
+
+        setTimeout(() => {
+          let summary = `Today, ${CONFIG.student.name} demonstrated strong engagement across ${selected.length} lesson${selected.length !== 1 ? 's' : ''}. `;
+          if (selected.length) {
+            const avg = Math.round(selected.reduce((s, l) => s + l.score, 0) / selected.length);
+            summary += `The student achieved an average performance score of ${avg}/100, `;
+            const top = selected.reduce((m, l) => l.score > m.score ? l : m);
+            summary += `with particularly strong performance in "${top.name}" (${top.score}/100). `;
+          }
+          if (project) summary += `Significant progress was made on the "${project}" project. `;
+          summary += notes ? `Teacher observations: ${notes}` : `The student showed consistent effort and engagement throughout the session.`;
+
+          aiSummary.textContent = summary;
+          aiSummary.className = 'text-sm text-gray-700 leading-relaxed min-h-[180px]';
+          aiStatus.textContent = 'Generated ✓';
+          aiStatus.className = 'text-xs text-green-600 italic font-semibold';
+          this.disabled = false; this.classList.remove('opacity-50');
+          this.innerHTML = '<i class="fas fa-check text-lg"></i> Summary Generated!';
+          setTimeout(() => { this.innerHTML = '<i class="fas fa-robot text-lg"></i> Regenerate Summary'; }, 3000);
+        }, 2000);
+      });
+
+      // ---- Save Journal ----
+      document.getElementById('saveJournalBtn').addEventListener('click', function () {
+        this.innerHTML = '<i class="fas fa-check"></i> Saved!';
+        setTimeout(() => { this.innerHTML = '<i class="fas fa-save text-lg"></i> Save Journal'; }, 2000);
+      });
+    });
+  </script>
+</body>
+
+</html>
