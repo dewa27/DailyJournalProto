@@ -129,6 +129,65 @@
         .action-btn.secondary:hover {
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
+        /* Responsive tweaks for small screens (<= 480px) */
+        @media (max-width: 480px) {
+            /* Stack header content vertically on very small screens */
+            .header-flex-mobile {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            main.max-w-4xl {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            /* Keep the card horizontal so action buttons stay pinned right */
+            .student-card {
+                flex-direction: row;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .student-info {
+                flex: 1 1 auto;
+                min-width: 0;
+            }
+
+            .student-avatar {
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
+            }
+
+            .student-details h3 {
+                font-size: 15px;
+            }
+
+            .student-details p {
+                font-size: 12px;
+            }
+
+            .action-btn, .action-btn.secondary {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            /* Allow action buttons to wrap if needed but keep them on the right */
+            .student-card .actions-wrap {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                justify-content: flex-end;
+            }
+            .name-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                min-width: 0;
+            }
+        }
     </style>
 </head>
 
@@ -136,7 +195,7 @@
     <!-- Header -->
     <header class="bg-primary text-white sticky top-0 z-30 shadow-lg">
         <div class="px-4 py-4">
-            <div class="flex items-center justify-between">
+            <div class="flex header-flex-mobile items-center justify-between">
                 <div class="flex items-center gap-3">
                     <img src="https://images.glints.com/unsafe/glints-dashboard.oss-ap-southeast-1.aliyuncs.com/company-logo/ff8acfa4d23038434c6f96322576f955.png" alt="Company Logo" class="h-10 w-auto" />
                     <div>
@@ -211,20 +270,26 @@
                 const isSent = journalsData[student.id]?.sent || false;
                 const initials = student.name.split(' ').map(word => word[0]).join('');
 
+                const statusHtml = isSent
+                    ? '<i class="fas fa-check-circle"></i> Sent'
+                    : isCompleted
+                        ? '<i class="fas fa-file-check"></i> Created'
+                        : '<i class="fas fa-file"></i> Not Created';
+
                 return `
                     <div class="student-card ${isSent ? 'sent' : ''}">
                         <div class="student-info">
                             <div class="student-avatar">${initials}</div>
                             <div class="student-details">
-                                <h3>${student.name}</h3>
+                                <div class="name-row">
+                                    <h3>${student.name}</h3>
+                                    <div class="status-badge ${isSent ? 'completed' : ''}">${statusHtml}</div>
+                                </div>
                                 <p>📱 ${student.parentPhone.replace(/(\d{2})(\d{4})(\d{4})(\d{4})/, '+$1 $2 $3 $4')}</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
-                            <div class="status-badge ${isSent ? 'completed' : ''}">
-                                ${isSent ? '<i class="fas fa-check-circle"></i> Sent' : isCompleted ? '<i class="fas fa-file-check"></i> Created' : '<i class="fas fa-file"></i> Not Started'}
-                            </div>
-                            <div style="display: flex; gap: 8px;">
+                            <div class="actions-wrap" style="display: flex; gap: 8px;">
                                 ${!isCompleted ? `<button class="action-btn" onclick="createJournal(${student.id})">
                                     <i class="fas fa-plus-circle"></i>
                                     Create

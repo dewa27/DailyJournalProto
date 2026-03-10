@@ -703,7 +703,7 @@
                 <!-- Notes -->
                 <div class="mb-6">
                     <label class="text-lg font-bold text-gray-800 block mb-3">Teacher Notes</label>
-                    <textarea id="teacherNotes" rows="6" placeholder="Write notes about student's performance..."
+                    <textarea id="teacherNotes" rows="6" placeholder="Write notes about student's performance...&#10Ex : Michelle ma belle, these are words that go together well My Michelle, ma belle, sont les mots qui vont très bien ensemble."
                         class="w-full bg-white border-2 border-gray-300 rounded-xl px-4 py-4 text-base resize-none focus:border-primary focus:outline-none"></textarea>
                 </div>
 
@@ -1436,7 +1436,39 @@
                 if (this.checked) inp.focus(); else inp.value = '';
             });
 
-            // ---- AI Generation ----
+            // ---- AI Generation (local/template-based, no API) ----
+            function generateAISummaryLocal(studentName, selectedLessons, objectives, project, notes) {
+                // Build concise, one-paragraph teacher-style summary (medium length)
+                const lessonCount = selectedLessons.length;
+                const uniqueObjectives = Array.from(new Set(objectives.map(o => o.trim()).filter(Boolean)));
+                const topObjectives = uniqueObjectives.slice(0, 4);
+
+                let parts = [];
+
+                if (lessonCount) {
+                    const topics = topObjectives.length ? topObjectives.join(', ') : 'the planned objectives';
+                    parts.push(`Today, ${studentName} worked through ${lessonCount} lesson${lessonCount !== 1 ? 's' : ''} focusing on ${topics}.`);
+                } else {
+                    parts.push(`Today, ${studentName} participated in class activities.`);
+                }
+
+                if (project) {
+                    parts.push(`Notable progress was observed on the "${project}" project.`);
+                }
+
+                if (notes) {
+                    // Keep teacher notes concise within the paragraph
+                    const trimmed = notes.length > 350 ? notes.slice(0, 347) + '...' : notes;
+                    parts.push(`Teacher observations: ${trimmed}`);
+                } else {
+                    parts.push(`The student was attentive and engaged during the session.`);
+                }
+
+                parts.push(`Suggested next step: reinforce the key objectives at home with a short practice or discussion.`);
+
+                return parts.join(' ');
+            }
+
             document.getElementById('generateAIBtn').addEventListener('click', function () {
                 const aiStatus = document.getElementById('aiStatus');
                 const aiSummary = document.getElementById('aiSummary');
@@ -1447,17 +1479,11 @@
                 const selected = CONFIG.allLessons.filter(l => l.selected);
                 const project = document.getElementById('projectInput').value.trim();
                 const notes = document.getElementById('teacherNotes').value.trim();
+                const objectives = selected.flatMap(l => l.objectives || []);
 
+                // Simulate async generation (no API key required)
                 setTimeout(() => {
-                    let summary = `Today, ${CONFIG.student.name} demonstrated strong engagement across ${selected.length} lesson${selected.length !== 1 ? 's' : ''}. `;
-                    if (selected.length) {
-                        const avg = Math.round(selected.reduce((s, l) => s + l.score, 0) / selected.length);
-                        summary += `The student achieved an average performance score of ${avg}/100, `;
-                        const top = selected.reduce((m, l) => l.score > m.score ? l : m);
-                        summary += `with particularly strong performance in "${top.name}" (${top.score}/100). `;
-                    }
-                    if (project) summary += `Significant progress was made on the "${project}" project. `;
-                    summary += notes ? `Teacher observations: ${notes}` : `The student showed consistent effort and engagement throughout the session.`;
+                    const summary = generateAISummaryLocal(CONFIG.student.name, selected, objectives, project, notes);
 
                     aiSummary.textContent = summary;
                     aiSummary.className = 'text-base text-gray-700 leading-relaxed min-h-[100px]';
@@ -1466,7 +1492,7 @@
                     this.disabled = false; this.classList.remove('opacity-50');
                     this.innerHTML = '<i class="fas fa-check text-2xl"></i> Summary Generated!';
                     setTimeout(() => { this.innerHTML = '<i class="fas fa-robot text-2xl"></i> Generate AI Summary'; }, 3000);
-                }, 2000);
+                }, 900);
             });
 
             // Desktop Save Journal Button - Main handler
